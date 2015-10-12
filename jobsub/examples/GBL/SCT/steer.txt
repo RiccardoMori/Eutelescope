@@ -1,0 +1,57 @@
+Cfiles
+millepede.bin
+
+Parameter
+1                        -0                       -1.                       ! X shift               0
+2                        -0                       -1.                       ! Y shift               0
+3                        0.0                      -1.                       ! Z shift               0
+5                        0.0                      -1.                       ! XZ rotation           0
+4                        0.0                      -1.                       ! YZ rotation           0
+6                        0.0                      -1.                       ! XY rotation           0
+11                       -0                       1                         ! X shift               1
+12                       -0                       1                         ! Y shift               1
+13                       0.0                      1                         ! Z shift               1
+15                       0.0                      -1.                       ! XZ rotation           1
+14                       0.0                      -1.                       ! YZ rotation           1
+16                       0.0                      1                         ! XY rotation           1
+21                       -0                       1                         ! X shift               2
+22                       -0                       1                         ! Y shift               2
+23                       0.0                      1                         ! Z shift               2
+25                       0.0                      -1.                       ! XZ rotation           2
+24                       0.0                      -1.                       ! YZ rotation           2
+26                       0.0                      1                         ! XY rotation           2
+81                       -0                       1                         ! X shift               8
+82                       -0                       1                         ! Y shift               8
+83                       0.0                      1                         ! Z shift               8
+85                       0.0                      -1.                       ! XZ rotation           8
+84                       0.0                      -1.                       ! YZ rotation           8
+86                       0.0                      1                         ! XY rotation           8
+31                       -0                       1                         ! X shift               3
+32                       -0                       1                         ! Y shift               3
+33                       0.0                      1                         ! Z shift               3
+35                       0.0                      -1.                       ! XZ rotation           3
+34                       0.0                      -1.                       ! YZ rotation           3
+36                       0.0                      1                         ! XY rotation           3
+41                       -0                       1                         ! X shift               4
+42                       -0                       1                         ! Y shift               4
+43                       0.0                      1                         ! Z shift               4
+45                       0.0                      -1.                       ! XZ rotation           4
+44                       0.0                      -1.                       ! YZ rotation           4
+46                       0.0                      1                         ! XY rotation           4
+201                      -0                       1                         ! X shift               20
+202                      -0                       1                         ! Y shift               20
+203                      0.0                      1                         ! Z shift               20
+205                      0.0                      -1.                       ! XZ rotation           20
+204                      0.0                      -1.                       ! YZ rotation           20
+206                      0.0                      1                         ! XY rotation           20
+51                       -0                       -1.                       ! X shift               5
+52                       -0                       -1.                       ! Y shift               5
+53                       0.0                      -1.                       ! Z shift               5
+55                       0.0                      -1.                       ! XZ rotation           5
+54                       0.0                      -1.                       ! YZ rotation           5
+56                       0.0                      -1.                       ! XY rotation           5
+
+method inversion 5 0.1
+outlierdownweighting 4
+chiscut 30 6
+end

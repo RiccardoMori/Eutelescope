@@ -40,6 +40,7 @@ using namespace std;
 #include "EUTelTrack.h"
 #include "EUTelHit.h"
 #include "EUTelReaderGenericLCIO.h"
+#include "TSystem.h"
 
 
 class output;
@@ -127,7 +128,7 @@ public:
   virtual void eventStart(int eventNR);;
   output(const std::string& name, const std::string& type);
   virtual ~output();
-  int m_event_nr;
+  int m_event_nr,m_eventNR_internal;
   TTree *m_tree;
   std::string m_name, m_type;
   std::vector<double> m_x, m_y, m_id;
@@ -144,6 +145,7 @@ void output::eventEnd()
 
 void output::eventStart(int eventNR)
 {
+  m_eventNR_internal++;
   m_event_nr = eventNR;
   m_id.clear();
   m_x.clear();
@@ -151,7 +153,7 @@ void output::eventStart(int eventNR)
   newEvent(eventNR);
 }
 
-output::output(const std::string& name, const std::string& type) :m_event_nr(0), m_name(name), m_type(type)
+output::output(const std::string& name, const std::string& type) :m_event_nr(0), m_name(name), m_type(type), m_eventNR_internal(0)
 {
   if (!gFile_)
   {
@@ -174,7 +176,9 @@ output::~output()
   if (m_tree)
   {
   //  std::cout << "Write!!! " << m_name << " " << m_type  << std::endl;
+ //   m_tree->SetEntries(m_eventNR_internal);
     m_tree->Write();
+
   }
 }
 
@@ -199,7 +203,7 @@ public:
 class GBL_trackOutput {
 public:
   typedef EUTelTrack * data_t;
-  GBL_trackOutput(const std::string& name )  {
+  GBL_trackOutput(const std::string& name) :m_event_nr(0){
     if (!gFile_)
     {
         std::cout << "create file with name: " << gStupitNameForShittyROOTFile << std::endl;
@@ -227,10 +231,12 @@ public:
 
     return true;
   }
-  ~GBL_trackOutput(){
+  virtual ~GBL_trackOutput(){
     if (m_tree){
 //        std::cout<<"Write GBL!! " << std::endl; 
+     // m_tree->SetEntries(m_event_nr);
       m_tree->Write();
+     
     }
   }
   virtual void pushCollection( EVENT::LCEvent* ev) {
@@ -624,6 +630,7 @@ void EUTelOutputTTree::end()
     std::cout << "closing  GBL " << std::endl;
 
   }
+  gSystem->Sleep(100);
   if (gFile_)
   {
     std::cout << "closing  file " << std::endl;

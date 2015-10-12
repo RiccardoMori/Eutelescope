@@ -44,3 +44,9 @@ external/*
 
 # ignore python byte code
 *.pyc
+
+jobsub/examples/GBL/SCT/clustering-*.xml
+jobsub/examples/GBL/SCT/converter-*.xml
+jobsub/examples/GBL/SCT/GBLTrackFit-*.xml
+jobsub/examples/GBL/SCT/hitmaker-*.xml
+jobsub/examples/GBL/SCT/patternRecognition-*.xml
