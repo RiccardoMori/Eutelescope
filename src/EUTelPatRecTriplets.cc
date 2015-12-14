@@ -10,7 +10,7 @@ namespace eutelescope {
 EUTelPatRecTriplets::EUTelPatRecTriplets(AIDA::IHistogram1D * DoubletXseperationHistoRight, AIDA::IHistogram1D * DoubletYseperationHistoRight, AIDA::IHistogram1D * DoubletXseperationHistoLeft,
 					   AIDA::IHistogram1D * DoubletYseperationHistoLeft, AIDA::IHistogram1D * TripletXseperationHistoRight, AIDA::IHistogram1D * TripletYseperationHistoRight,
 					   AIDA::IHistogram1D * TripletXseperationHistoLeft, AIDA::IHistogram1D * TripletYseperationHistoLeft, AIDA::IHistogram1D * TripletDistCutXHisto,
-					   AIDA::IHistogram1D * TripletDistCutYHisto):  
+					   AIDA::IHistogram1D * TripletDistCutYHisto, AIDA::IHistogram1D * TripletSlopeHistoX, AIDA::IHistogram1D * TripletSlopeHistoY, AIDA::IHistogram1D * DUTWindowHisto ):  
 _eventNumber(0),
 _totalNumberOfHits(0),
 _numberTripletsLeft(0),
@@ -30,7 +30,10 @@ _TripletYseperationHistoRight(TripletYseperationHistoRight),
 _TripletXseperationHistoLeft(TripletXseperationHistoLeft),
 _TripletYseperationHistoLeft(TripletYseperationHistoLeft),
 _TripletDistCutXHisto(TripletDistCutXHisto),
-_TripletDistCutYHisto(TripletDistCutYHisto)
+_TripletDistCutYHisto(TripletDistCutYHisto),
+_TripletSlopeHistoX(TripletSlopeHistoX),
+_TripletSlopeHistoY(TripletSlopeHistoY),
+_DUTWindowHisto(DUTWindowHisto)
 {
     EUTelExcludedPlanes();
 
@@ -241,6 +244,8 @@ std::vector<std::vector<EUTelHit> > EUTelPatRecTriplets::getTrackHitsFromTriplet
 	  streamlog_out(DEBUG0) << "itLeftTriplet->matches = " <<itLeftTriplet->matches<< "  itRightTriplet->matches = " <<itRightTriplet->matches<< std::endl;
 
                     streamlog_out(DEBUG1) << "Triplet slope delta match Cut: " <<"X delta: " << fabs(itRightTriplet->slope.at(0) - itLeftTriplet->slope.at(0)) <<" Cut: " << _tripletSlopeCuts.at(0) << " Y delta: " <<  fabs(itRightTriplet->slope.at(1) - itLeftTriplet->slope.at(1))<<" Cut: " <<  _tripletSlopeCuts.at(1)  << std::endl;
+           _TripletSlopeHistoX ->fill(itRightTriplet->slope.at(0) - itLeftTriplet->slope.at(0));
+           _TripletSlopeHistoY ->fill(itRightTriplet->slope.at(1) - itLeftTriplet->slope.at(1));
 
             if(fabs(itRightTriplet->slope.at(0) - itLeftTriplet->slope.at(0)) > _tripletSlopeCuts.at(0)  or fabs(itRightTriplet->slope.at(1) - itLeftTriplet->slope.at(1)) >_tripletSlopeCuts.at(1)  ){
                 continue;
@@ -324,6 +329,7 @@ bool EUTelPatRecTriplets::getDoubHitOnTraj(doublets const& doub, std::vector<uns
             std::vector<float>  pos = getDoubPosAtZ(doub, hitPosZ);/// Could calculate this once. Might be a bit off for tilted sensors.
 
             float dist = getDistLocal(itHit, pos);
+
     //        std::cout<<"Dist " << dist  << std::endl;
 
             if(itHit == hits.begin()){
@@ -332,10 +338,14 @@ bool EUTelPatRecTriplets::getDoubHitOnTraj(doublets const& doub, std::vector<uns
       //          std::cout<<"DistBest begin " << distBest  << std::endl;
 
             }
+
             if(dist < distBest){
                 hitBest = *itHit;
                 distBest = dist;
         //        std::cout<<"DistBest " << distBest  << std::endl;
+            }
+            if(itHit == hits.end()-1){
+               _DUTWindowHisto ->fill(distBest);
             }
         }
 
@@ -423,9 +433,9 @@ std::vector<EUTelTrack> EUTelPatRecTriplets::getMinFakeTracks(){
         // Each track can only be associated to a single DUT hit on each plane. Must also make sure that a hit is not associated to multiple tracks.
         // So you could have two tracks with the same DUT hit attached.
         std::vector< std::pair< std::vector<EUTelHit> , std::vector<EUTelHit> > > tracksAndDUTHitsUnique;
-  //      std::cout<<" Tracks before unique: " << tracksAndDUTHits.size() << std::endl;
+//        std::cout<<" Tracks before unique: " << tracksAndDUTHits.size() << std::endl;
         tracksAndDUTHitsUnique = getUniqueMatches(tracksAndDUTHits);
-   //     std::cout<<" Tracks after unique " << tracksAndDUTHitsUnique.size() << std::endl;
+//        std::cout<<" Tracks after unique " << tracksAndDUTHitsUnique.size() << std::endl;
 
         for(size_t i =0 ; i < tracksAndDUTHitsUnique.size() ; ++i){
             std::vector<EUTelHit> track = tracksAndDUTHitsUnique.at(i).first;
@@ -453,20 +463,32 @@ std::vector<EUTelTrack> EUTelPatRecTriplets::getMinFakeTracks(){
     for(size_t i =0 ; i < tracksAndDUTHits.size() ; ++i){///Loop through all tracks and vector of DUT hits
         std::vector<EUTelHit> uniHits;
         if(tracksAndDUTHits.at(i).second.size() != 0 ){///If no DUT hit then pass track and don't check for DUT miss matching.
+         //   std::cout<<"Hits on track "<< i << "  :" << tracksAndDUTHits.at(i).second.size() << std::endl;
             for(size_t j = 0; j < tracksAndDUTHits.at(i).second.size(); ++j){///Loop through all hits attached to track
                 EUTelHit hit = tracksAndDUTHits.at(i).second.at(j);///This is the hit we are comparing to.
+          //      std::cout<<"Check hit "<< j <<" from track " << i  << std::endl;
+
                 bool unique = true;
                 for(size_t k =i+1 ; k < tracksAndDUTHits.size() ; ++k){///Loop through all after the one compared to.
                     std::vector<EUTelHit>::iterator itHitMatch = std::find(tracksAndDUTHits.at(k).second.begin(),tracksAndDUTHits.at(k).second.end(),hit);
                     if(itHitMatch != tracksAndDUTHits.at(k).second.end()){///If this is not unique remove from this vector and continue search.
+        //                std::cout<<"Not unique " << std::endl;
+      //                  std::cout<<"Track " << k << "  compare size before remove"<<tracksAndDUTHits.at(k).second.size() << std::endl;
                         tracksAndDUTHits.at(k).second.erase(itHitMatch);
+    //                    std::cout<<"Track " << k << "  compare size after remove"<<tracksAndDUTHits.at(k).second.size() << std::endl;
+
                         unique = false;
+                    }else{
+  //                      std::cout<<"Unique wrt track "<< k << std::endl;
                     }
+
                 }
                 if(unique){///If unique add to vector. 
                     uniHits.push_back(hit);
                 }
-                if(j == tracksAndDUTHits.at(i).second.size()-1  and unique){///If we are on the last hit of this track create track and add new unique hits. 
+                if(j == tracksAndDUTHits.at(i).second.size()-1){///If we are on the last hit of this track create track and add new unique hits. 
+//                    std::cout<<"Hits on track after search:" << uniHits.size() << std::endl;
+
                     tracksAndDUTHitsUnique.push_back(std::make_pair(tracksAndDUTHits.at(i).first,uniHits));
                 }
             }
